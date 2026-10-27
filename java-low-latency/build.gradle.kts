@@ -1,16 +1,11 @@
 plugins {
 	java
 	application
+	id("com.gradleup.shadow") version "9.6.1"
 }
 
 group = "com.vampireteeth"
 version = "0.0.1-SNAPSHOT"
-
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(25)
-	}
-}
 
 repositories {
 	mavenCentral()
@@ -25,10 +20,20 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(25)
+	}
+}
+
 application {
 	mainClass = "com.vampireteeth.trading.Main"
 }
 
+tasks.shadowJar {
+	archiveClassifier.set("")  // no "-all" suffix
+	mergeServiceFiles()
+}
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
