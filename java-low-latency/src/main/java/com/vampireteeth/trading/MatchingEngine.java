@@ -1,5 +1,6 @@
 package com.vampireteeth.trading;
 
+import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.util.DaemonThreadFactory;
@@ -15,16 +16,14 @@ public class MatchingEngine {
     private final Map<Integer, OrderBook> books = new HashMap<>();
     private final AtomicLong seqCounter = new AtomicLong(0);
 
-    public MatchingEngine(int orderBufferSize, int tradeBufferSize) {
+    public MatchingEngine(int orderBufferSize, int tradeBufferSize, EventHandler<TradeEvent> tradeEventHandler) {
         // Trade ring (downstream)
         Disruptor<TradeEvent> tradeDisruptor = new Disruptor<>(
                 TradeEvent::new,
                 tradeBufferSize,
                 DaemonThreadFactory.INSTANCE
         );
-        tradeDisruptor.handleEventsWith((event, seq, eob) ->
-                System.out.println("  [trade] " + event)
-        );
+        tradeDisruptor.handleEventsWith(tradeEventHandler);
         tradeDisruptor.start();
         this.tradeRing = tradeDisruptor.getRingBuffer();
 
@@ -95,9 +94,7 @@ public class MatchingEngine {
             }
             // Residual rests on the bid side
             if (remaining > 0) {
-                Order order = new Order();
-                order.set(orderId, clientId, price, remaining, seq, 0);
-                book.insert(order);
+                book.insertNewOrder(orderId, clientId, price, remaining, seqCounter.incrementAndGet(), 0);
                 System.out.println("  [rest] BUY " + remaining + " @ " + (price / 10_000.0));
             }
         } else {
@@ -122,9 +119,7 @@ public class MatchingEngine {
                 }
             }
             if (remaining > 0) {
-                Order order = new Order();
-                order.set(orderId, clientId, price, remaining, seq, 1);
-                book.insert(order);
+                book.insertNewOrder(orderId, clientId, price, remaining, seqCounter.incrementAndGet(), 1);
                 System.out.println("  [rest] SELL " + remaining + " @ " + (price / 10_000.0));
             }
         }

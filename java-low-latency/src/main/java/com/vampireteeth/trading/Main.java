@@ -9,7 +9,9 @@ public class Main {
 
     public static void main() throws Exception {
 
-        MatchingEngine engine = new MatchingEngine(1024, 1024);
+        MatchingEngine engine = new MatchingEngine(1024, 1024,
+                (event, seq, eob) ->
+                        System.out.println("  [trade] " + event));
 
         System.out.println("=== Publishing test orders ===\n");
 

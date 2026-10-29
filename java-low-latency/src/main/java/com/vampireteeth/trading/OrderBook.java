@@ -22,6 +22,13 @@ public class OrderBook {
         return asks.isEmpty() ? Long.MIN_VALUE : asks.firstKey();
     }
 
+
+    public void insertNewOrder(long orderId, long clientId, long price, long remaining, long seq, int side) {
+        Order order = new Order();
+        order.set(orderId, clientId, price, remaining, seq, side);
+        this.insert(order);
+    }
+
     public void insert(Order order) {
         TreeMap<Long, ArrayDeque<Order>> book = (order.side == 0) ? bids : asks;
         book.computeIfAbsent(order.priceTicks, k -> new ArrayDeque<>()).addLast(order);

@@ -12,11 +12,10 @@ repositories {
 }
 
 dependencies {
-	// implementation("org.springframework.boot:spring-boot-starter")
-	// testImplementation("org.springframework.boot:spring-boot-starter-test")
 	implementation("com.lmax:disruptor:4.0.0")
 	implementation("org.agrona:agrona:2.6.1")
 	testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
+	testImplementation("org.assertj:assertj-core:3.27.7")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
